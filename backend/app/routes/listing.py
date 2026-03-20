@@ -5,7 +5,7 @@ from app.dependencies.auth import get_current_user
 from fastapi import Depends, HTTPException
 from app.models.listing import Listing
 from app.models.user import User
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/listings", tags=["listings"])
@@ -26,11 +26,30 @@ def create_listing(listing: ListingCreate, db: Session = Depends(get_db), curren
     db.commit()
     db.refresh(new_listing)
     return new_listing
+    
+@router.get("/", response_model=List[ListingResponse])
+def get_listings(
+    db: Session = Depends(get_db),
+    search: Optional[str] = None,
+    max_price: Optional[int] = None,
+    city: Optional[str] = None
+):
+    query = db.query(Listing).filter(Listing.status == "active")
 
-@router.get("/", response_model=List[ListingResponse], status_code=200)
-def get_listings(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    listings = db.query(Listing).filter(Listing.status == "active").all()
-    return listings
+    if search:
+        query = query.filter(
+            Listing.title.ilike(f"%{search}%") |
+            Listing.description.ilike(f"%{search}%")
+        )
+
+    if max_price:
+        query = query.filter(Listing.price <= max_price)
+
+    if city:
+        query = query.filter(Listing.location_city.ilike(f"%{city}%"))
+
+    return query.order_by(Listing.created_at.desc()).all()
+
 
 @router.get("/{listing_id}", response_model=ListingResponse, status_code=200)
 def get_listing(listing_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

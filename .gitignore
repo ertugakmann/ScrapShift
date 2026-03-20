@@ -32,3 +32,8 @@ backend/.env
 # Logs / runtime files
 *.log
 *.pid
+
+# Frontend / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
