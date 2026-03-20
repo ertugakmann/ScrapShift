@@ -74,3 +74,22 @@ def delete_listing(listing_id: int, db: Session = Depends(get_db), current_user:
         raise HTTPException(status_code=404, detail="Listing not found")
     db.delete(db_listing)
     db.commit()
+
+@router.get("/my-listings", response_model=List[ListingResponse], status_code="200")
+def get_my_listings(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    listings = db.query(Listing).filter(Listing.user_id == current_user.id).all()
+    return listings
+
+@router.patch("/{listing_id}/sold", status_code=204)
+def mark_listing_as_sold(listing_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+   listing = db.query(Listing).filter(Listing.id == listing_id).first()
+
+   if not listing:
+    raise HTTPException(status_code=404, detail="Listing not found")
+
+   if current_user.id != listing.user_id:
+    raise HTTPException(status_code=403, detail="Unauthorized to mark this listing as sold")
+
+   listing.status = "sold"
+   db.commit()
+   return {"message": "Listing marked as sold"}
