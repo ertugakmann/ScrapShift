@@ -5,12 +5,15 @@ export default function HomePage() {
   return (
     <section className="space-y-4">
       <div className="rounded-xl border border-slate-200/80 bg-gradient-to-br from-brand-50 via-white to-blue-50 p-5 shadow-md sm:p-7">
-        <p className="text-sm font-semibold text-brand-600">Budget-friendly marketplace</p>
+        <p className="text-sm font-semibold text-brand-600">
+          Budget-friendly marketplace
+        </p>
         <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-          Find quality used cars under £5000
+          ScrapShift - Your Local Car Marketplace
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-slate-600 sm:text-base">
-          Browse local listings, compare options quickly, and connect with sellers in minutes.
+          Browse local listings, compare options quickly, and connect with
+          sellers in minutes.
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
@@ -90,8 +93,12 @@ export default function HomePage() {
       </div>
 
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-slate-900">Latest Listings</h2>
-        <p className="text-sm font-medium text-slate-500">{mockListings.length} cars available</p>
+        <h2 className="text-xl font-semibold text-slate-900">
+          Latest Listings
+        </h2>
+        <p className="text-sm font-medium text-slate-500">
+          {mockListings.length} cars available
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

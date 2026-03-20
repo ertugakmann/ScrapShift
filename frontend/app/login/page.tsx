@@ -1,8 +1,40 @@
+"use client";
+
 import Link from "next/link";
 
 import { InputField } from "@/components/ui/input-field";
+import { useState } from "react";
+import { login } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      setIsLoading(true);
+      await login(email, password);
+      router.push("/");
+      setIsLoading(false);
+    } catch (error) {
+      setError("Invalid credentials");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen flex items-center justify-center md:h-[calc(100vh-104px)] md:min-h-[calc(100vh-104px)]">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -10,46 +42,57 @@ export default function LoginPage() {
           <section className="flex h-full flex-col order-1 md:order-2">
             <div className="flex h-full w-full items-center justify-center">
               <form className="w-full max-w-md space-y-5 rounded-xl bg-white p-6 shadow-lg sm:p-8">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                  Welcome back
-                </h1>
-                <p className="mt-2 text-sm text-slate-600">
-                  Sign in to manage your listings.
-                </p>
-              </div>
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                    Welcome back
+                  </h1>
+                  <p className="mt-2 text-sm text-slate-600">
+                    Sign in to manage your listings.
+                  </p>
+                </div>
 
-              <div className="space-y-4">
-                <InputField
-                  id="email"
-                  label="Email"
-                  type="email"
-                  placeholder="you@example.com"
-                />
-                <InputField
-                  id="password"
-                  label="Password"
-                  type="password"
-                  placeholder="••••••••"
-                />
-              </div>
+                {error && <p className="text-red-500 font-semibold">{error}</p>}
 
-              <button
-                type="button"
-                className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
-              >
-                Login
-              </button>
+                <div className="space-y-4">
+                  <InputField
+                    id="email"
+                    label="Email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEmail(e.target.value)
+                    }
+                  />
+                  <InputField
+                    id="password"
+                    label="Password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPassword(e.target.value)
+                    }
+                  />
+                </div>
 
-              <p className="text-sm text-slate-600">
-                No account yet?{" "}
-                <Link
-                  href="/register"
-                  className="font-medium text-blue-600 hover:underline"
+                <button
+                  type="button"
+                  className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
+                  onClick={handleLogin}
                 >
-                  Register
-                </Link>
-              </p>
+                  Login
+                </button>
+
+                <p className="text-sm text-slate-600">
+                  No account yet?{" "}
+                  <Link
+                    href="/register"
+                    className="font-medium text-blue-600 hover:underline"
+                  >
+                    Register
+                  </Link>
+                </p>
               </form>
             </div>
           </section>
