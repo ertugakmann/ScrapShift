@@ -1,8 +1,47 @@
+"use client";
+
 import Link from "next/link";
 
 import { InputField } from "@/components/ui/input-field";
+import { useState } from "react";
+import { register } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function RegisterPage() {
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone_number, setPhoneNumber] = useState("");
+
+  const handleRegister = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      await register(email, password, username, phone_number);
+      router.push("/login");
+    } catch (err: any) {
+      console.log(err.response?.data?.detail);
+      if (err.response?.data?.detail === "Username is already taken") {
+        setError("Username is already taken");
+      } else if (
+        err.response?.data?.detail ===
+        "An account with this email already exists"
+      ) {
+        setError("An account with this email already exists");
+      } else {
+        setError("Something went wrong");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center md:h-[calc(100vh-104px)] md:min-h-[calc(100vh-104px)]">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -25,32 +64,43 @@ export default function RegisterPage() {
                     label="Email"
                     type="email"
                     placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                   <InputField
                     id="username"
                     label="Username"
                     placeholder="carhunter95"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                   />
                   <InputField
                     id="password"
                     label="Password"
                     type="password"
                     placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <InputField
                     id="phone"
                     label="Phone"
                     type="tel"
                     placeholder="07..."
+                    value={phone_number}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                   />
                 </div>
 
                 <button
                   type="button"
                   className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
+                  onClick={handleRegister}
                 >
-                  Create Account
+                  {isLoading ? "Logging in..." : "Login"}
                 </button>
+
+                {error && <p className="text-red-500 font-semibold">{error}</p>}
 
                 <p className="text-sm text-slate-600">
                   Already registered?{" "}

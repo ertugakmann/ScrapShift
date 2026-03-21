@@ -11,12 +11,15 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserResponse, status_code=201)
 def register(user: UserCreate, db: Session = Depends(get_db)):
+
     if db.query(User).filter(User.email == user.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="An account with this email already exists")
+
     if db.query(User).filter(User.username == user.username).first():
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(status_code=400, detail="Username is already taken")
+
     if db.query(User).filter(User.phone_number == user.phone_number).first():
-        raise HTTPException(status_code=400, detail="Phone number already registered")
+        raise HTTPException(status_code=400, detail="Phone number is already taken")
 
     hashed_password = hash_password(user.password)
     new_user = User(
@@ -25,6 +28,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         phone_number=user.phone_number,
         hashed_password=hashed_password,
     )
+    
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

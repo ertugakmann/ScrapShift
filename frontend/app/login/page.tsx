@@ -6,6 +6,7 @@ import { InputField } from "@/components/ui/input-field";
 import { useState } from "react";
 import { login } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,9 +21,8 @@ export default function LoginPage() {
       setIsLoading(true);
       await login(email, password);
       router.push("/");
-      setIsLoading(false);
-    } catch (error) {
-      setError("Invalid credentials");
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
