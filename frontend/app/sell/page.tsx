@@ -8,7 +8,7 @@ export default function SellPage() {
           Create Listing
         </h1>
         <p className="mt-2 text-sm text-slate-600 sm:text-base">
-          Add your car details and publish your ad. (Frontend UI only)
+          Add your car details and publish your ad.
         </p>
       </div>
 
