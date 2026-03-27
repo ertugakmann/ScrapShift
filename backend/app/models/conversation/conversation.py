@@ -18,4 +18,4 @@ class Conversation(Base):
     seller = relationship("User", foreign_keys=[seller_id])
     listing = relationship("Listing")
     messages = relationship("Message", back_populates="conversation", lazy="dynamic")
-    offers = relationship("Offer", back_populates="conversation")  # eksikti
+    offers = relationship("Offer", back_populates="conversation")
