@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 from app.schemas.common import UserBrief
 
+
 class OfferCreate(BaseModel):
     amount: float
 

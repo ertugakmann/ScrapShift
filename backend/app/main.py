@@ -1,5 +1,5 @@
 from app.db import Base, engine
-from app.routes import auth, listing
+from app.routes import auth, listing, conversations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

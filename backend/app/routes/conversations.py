@@ -1,13 +1,22 @@
-from fastapi import APIRouter
-from app.dependencies import get_db, get_current_user
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.models import User
-from app.schemas import ConversationResponse
+from app.schemas.conversation.conversation import ConversationCreate, ConversationResponse
+from app.schemas.conversation.message import MessageCreate, MessageResponse
+from app.schemas.conversation.offer import OfferCreate, OfferResponse, OfferUpdate
+from app.models.listing import Listing
+from app.models.user import User
+from app.models.conversation.conversation import Conversation
+from app.models.conversation.message import Message
+from app.models.conversation.offer import Offer
+from typing import List
+from app.dependencies.db import get_db
+from app.dependencies.auth import get_current_user
+
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
 @router.post("/", response_model= ConversationResponse, status_code=201)
-def create_conversation(data= ConversationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user):
+def create_conversation(data: ConversationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Check if the listing exists
     listing = db.query(Listing).filter(Listing.id == data.listing_id).first()
     if not listing:
@@ -30,7 +39,7 @@ def create_conversation(data= ConversationCreate, db: Session = Depends(get_db),
     # Create a new conversation
     new_conversation = Conversation(
         listing_id=data.listing_id,
-        buyer_id=current_user.id
+        buyer_id=current_user.id,
         seller_id=listing.owner_id
     )
 
@@ -44,9 +53,6 @@ def get_conversations(db: Session = Depends(get_db), current_user: User = Depend
     conversations = db.query(Conversation).filter(
         (Conversation.buyer_id == current_user.id) | (Conversation.seller_id == current_user.id)
     ).all()
-    
-    if not conversations:
-        raise HTTPException(status_code=404, detail="No conversations found")
     
     return conversations
 
@@ -92,11 +98,18 @@ def get_messages(conversation_id: int, db: Session = Depends(get_db), current_us
 
     if conversation.buyer_id != current_user.id and conversation.seller_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to view messages in this conversation")
+    
+    db.query(Message).filter(
+        Message.conversation_id == conversation_id,
+        Message.sender_id != current_user.id,
+        Message.is_read == False
+    ).update({"is_read": True})
+    db.commit()
 
     messages = db.query(Message).filter(Message.conversation_id == conversation_id).all()
     return messages
 
-@router.post("/conversations/{conversation_id}/offers", response_model=OfferResponse, status_code=201
+@router.post("/{conversation_id}/offers", response_model=OfferResponse, status_code=201)
 def create_offer(conversation_id: int, data: OfferCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
 
@@ -118,8 +131,8 @@ def create_offer(conversation_id: int, data: OfferCreate, db: Session = Depends(
     db.refresh(new_offer)
     return new_offer
 
-@router.patch("/conversation/{conversation_id}/offers/{offer_id}", response_model=OfferResponse, status_code=200)
-def answer_offer(conversation_id: int, offer_id: int, data: OfferAnswer, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.patch("/{conversation_id}/offers/{offer_id}", response_model=OfferResponse, status_code=200)
+def answer_offer(conversation_id: int, offer_id: int, data: OfferUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
 
     if not conversation:
@@ -139,7 +152,7 @@ def answer_offer(conversation_id: int, offer_id: int, data: OfferAnswer, db: Ses
     if offer.is_accepted is not None:
         raise HTTPException(status_code=400, detail="Offer has already been answered")
 
-    offer.is_accepted = data.is_accepted
+    offer.status = data.is_accepted
     db.commit()
     db.refresh(offer)
 
@@ -150,3 +163,14 @@ def answer_offer(conversation_id: int, offer_id: int, data: OfferAnswer, db: Ses
         db.commit()
 
     return offer
+
+@router.get("/unread-count", status_code=200)
+def get_unread_count(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    unread_count = db.query(Message).filter(
+        Message.conversation.has(
+            (Conversation.buyer_id == current_user.id) | (Conversation.seller_id == current_user.id)
+        ),
+        Message.sender_id != current_user.id,
+        Message.is_read == False
+    ).count()
+    return {"unread_count": unread_count}
