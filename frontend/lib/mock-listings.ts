@@ -1,4 +1,5 @@
-import { Listing } from "@/lib/types";
+import { Listing } from "@/types/listing";
+
 
 export const mockListings: Listing[] = [
   {

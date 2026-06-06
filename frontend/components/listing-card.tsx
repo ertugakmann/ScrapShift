@@ -1,7 +1,6 @@
+import { Listing } from "@/types/listing";
 import Image from "next/image";
 import Link from "next/link";
-
-import { Listing } from "@/lib/types";
 
 type ListingCardProps = {
   listing: Listing;

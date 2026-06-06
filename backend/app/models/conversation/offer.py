@@ -1,7 +1,7 @@
-from app.db import Base
-from sqlalchemy import Column, Integer, ForeignKey, String, DateTime
 from datetime import datetime
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Numeric, String
 from sqlalchemy.orm import relationship
+from app.db import Base
 
 
 class Offer(Base):
@@ -10,6 +10,10 @@ class Offer(Base):
     id = Column(Integer, primary_key=True, index=True)
     conversation_id = Column(Integer, ForeignKey("conversations.id"))
     sender_id = Column(Integer, ForeignKey("users.id"))
-    amount = Column(Integer)
-    status = Column(String) # "pending", "accepted", "rejected"
-    created_at = Column(DateTime, default=datetime.now)
+    amount = Column(Numeric(10, 2))
+    status = Column(String, default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    conversation = relationship("Conversation", back_populates="offers")
+    sender = relationship("User")
