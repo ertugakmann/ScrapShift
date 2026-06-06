@@ -52,7 +52,7 @@ def get_listings(
 
 
 @router.get("/{listing_id}", response_model=ListingResponse, status_code=200)
-def get_listing(listing_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_listing(listing_id: int, db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
     if not listing:

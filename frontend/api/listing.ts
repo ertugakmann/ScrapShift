@@ -18,22 +18,57 @@ export type GetListingsParams = {
   city?: string;
 };
 
-export async function createListing(payload: CreateListingPayload): Promise<Listing> {
+export async function createListing(
+  payload: CreateListingPayload,
+): Promise<Listing> {
   const { data } = await api.post<Listing>("/listings/", payload);
   return data;
 }
 
-export async function getListings(params?: GetListingsParams): Promise<Listing[]> {
+export async function getListings(
+  params?: GetListingsParams,
+): Promise<Listing[]> {
   const { data } = await api.get<Listing[]>("/listings/", { params });
   return data;
 }
 
-export async function getListing(id: number): Promise<Listing> {
-  const { data } = await api.get<Listing>(`/listings/${id}`);
-  return data;
+type ListingApiResponse = {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  mileage: number;
+  year: number;
+  location_city: string;
+  image_url: string;
+  status: string;
+};
+
+function mapListing(data: ListingApiResponse): Listing {
+  return {
+    id: String(data.id),
+    title: data.title,
+    price: data.price,
+    location: data.location_city,
+    image: data.image_url,
+    description: data.description,
+    mileage: data.mileage,
+    year: data.year,
+    sellerName: "Private seller",
+    sellerPhone: "",
+    sold: data.status === "sold",
+  };
 }
 
-export async function updateListing(id: number, payload: CreateListingPayload): Promise<Listing> {
+export async function getListing(id: string): Promise<Listing> {
+  const { data } = await api.get<ListingApiResponse>(`/listings/${id}`);
+  return mapListing(data);
+}
+
+export async function updateListing(
+  id: number,
+  payload: CreateListingPayload,
+): Promise<Listing> {
   const { data } = await api.put<Listing>(`/listings/${id}`, payload);
   return data;
 }

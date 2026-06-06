@@ -1,6 +1,5 @@
 import { Listing } from "@/types/listing";
 
-
 export const mockListings: Listing[] = [
   {
     id: "1",
@@ -14,7 +13,7 @@ export const mockListings: Listing[] = [
     mileage: 93400,
     year: 2011,
     sellerName: "James K.",
-    sellerPhone: "07911 000123"
+    sellerPhone: "07911 000123",
   },
   {
     id: "2",
@@ -28,7 +27,7 @@ export const mockListings: Listing[] = [
     mileage: 108200,
     year: 2009,
     sellerName: "Aisha M.",
-    sellerPhone: "07822 100200"
+    sellerPhone: "07822 100200",
   },
   {
     id: "3",
@@ -42,7 +41,7 @@ export const mockListings: Listing[] = [
     mileage: 82100,
     year: 2013,
     sellerName: "Tom R.",
-    sellerPhone: "07777 450990"
+    sellerPhone: "07777 450990",
   },
   {
     id: "4",
@@ -56,7 +55,7 @@ export const mockListings: Listing[] = [
     mileage: 120500,
     year: 2008,
     sellerName: "Sarah W.",
-    sellerPhone: "07555 310888"
+    sellerPhone: "07555 310888",
   },
   {
     id: "5",
@@ -70,7 +69,7 @@ export const mockListings: Listing[] = [
     mileage: 97500,
     year: 2012,
     sellerName: "Bilal H.",
-    sellerPhone: "07444 888212"
+    sellerPhone: "07444 888212",
   },
   {
     id: "6",
@@ -85,9 +84,6 @@ export const mockListings: Listing[] = [
     year: 2010,
     sellerName: "Emma L.",
     sellerPhone: "07321 224466",
-    sold: true
-  }
+    sold: true,
+  },
 ];
-
-export const getListingById = (id: string) =>
-  mockListings.find((listing) => listing.id === id);

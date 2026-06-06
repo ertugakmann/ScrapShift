@@ -1,4 +1,5 @@
 import axios from "axios";
+import { removeToken, setToken } from "@/lib/token";
 
 const notifyAuthChanged = () => {
   if (typeof window === "undefined") return;
@@ -31,7 +32,7 @@ export const login = async (email: string, password: string) => {
       { email, password },
     );
 
-    localStorage.setItem("token", response.data.access_token);
+    setToken(response.data.access_token);
     notifyAuthChanged();
 
     return response.data;
@@ -46,7 +47,7 @@ export const login = async (email: string, password: string) => {
   }
 };
 export const logout = async () => {
-  localStorage.removeItem("token");
+  removeToken();
   notifyAuthChanged();
   return true;
 };

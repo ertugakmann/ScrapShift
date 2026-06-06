@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getClientToken, getServerToken } from "@/lib/token";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000",
@@ -7,12 +8,16 @@ const api = axios.create({
   },
 });
 
-// Add a request interceptor to include the token in the Authorization header
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+api.interceptors.request.use(async (config) => {
+  const token =
+    typeof window !== "undefined"
+      ? getClientToken()
+      : await getServerToken();
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 

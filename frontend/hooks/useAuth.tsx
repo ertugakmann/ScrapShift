@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { getClientToken, removeToken } from "@/lib/token";
 
 type DecodedToken = {
   exp?: number;
@@ -15,16 +16,6 @@ type AuthState = {
   user: DecodedToken | null;
   isLoading: boolean;
   refreshAuth: () => void;
-};
-
-const TOKEN_KEY = "token";
-
-const readToken = (): string | null => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return localStorage.getItem(TOKEN_KEY);
 };
 
 const isExpired = (exp?: number) => {
@@ -41,7 +32,7 @@ export const useAuth = (): AuthState => {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshAuth = useCallback(() => {
-    const token = readToken();
+    const token = getClientToken();
 
     if (!token) {
       setIsAuthenticated(false);
@@ -54,7 +45,7 @@ export const useAuth = (): AuthState => {
       const decoded = jwtDecode<DecodedToken>(token);
 
       if (isExpired(decoded.exp)) {
-        localStorage.removeItem(TOKEN_KEY);
+        removeToken();
         setIsAuthenticated(false);
         setUser(null);
       } else {
@@ -62,7 +53,7 @@ export const useAuth = (): AuthState => {
         setUser(decoded);
       }
     } catch {
-      localStorage.removeItem(TOKEN_KEY);
+      removeToken();
       setIsAuthenticated(false);
       setUser(null);
     } finally {
@@ -73,28 +64,14 @@ export const useAuth = (): AuthState => {
   useEffect(() => {
     refreshAuth();
 
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === TOKEN_KEY) {
-        refreshAuth();
-      }
-    };
-
     const handleAuthChanged = () => {
       refreshAuth();
     };
 
-    const handleWindowFocus = () => {
-      refreshAuth();
-    };
-
-    window.addEventListener("storage", handleStorage);
     window.addEventListener("authChanged", handleAuthChanged);
-    window.addEventListener("focus", handleWindowFocus);
 
     return () => {
-      window.removeEventListener("storage", handleStorage);
       window.removeEventListener("authChanged", handleAuthChanged);
-      window.removeEventListener("focus", handleWindowFocus);
     };
   }, [refreshAuth]);
 
