@@ -46,7 +46,7 @@ type ListingApiResponse = {
 
 function mapListing(data: ListingApiResponse): Listing {
   return {
-    id: String(data.id),
+    id: data.id,
     title: data.title,
     price: data.price,
     location: data.location_city,
