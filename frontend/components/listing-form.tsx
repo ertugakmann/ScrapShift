@@ -168,14 +168,24 @@ export function ListingForm({
       formState;
 
     if (
-      !title ||
-      !description ||
+      !title.trim() ||
+      !description.trim() ||
       !price ||
       !mileage ||
       !year ||
-      !location_city
+      !location_city.trim()
     ) {
       setSubmitError("Please fill in all fields.");
+      return;
+    }
+
+    if (Number(price) <= 0 || Number(mileage) < 0) {
+      setSubmitError("Price and mileage must be valid positive numbers.");
+      return;
+    }
+
+    if (Number(year) < 1900 || Number(year) > new Date().getFullYear() + 1) {
+      setSubmitError("Please enter a valid year.");
       return;
     }
 

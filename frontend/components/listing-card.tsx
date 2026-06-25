@@ -11,7 +11,6 @@ export function ListingCard({
   listing,
   showActions = false,
 }: ListingCardProps) {
-  console.log("ListingCard props:", listing, showActions); // Debugging line
   return (
     <article className="group overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-md transition duration-200 hover:scale-[1.02] hover:shadow-xl">
       <Link href={`/listings/${listing.id}`} className="block">

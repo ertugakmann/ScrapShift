@@ -14,7 +14,7 @@ export type CreateListingPayload = {
 
 export type GetListingsParams = {
   search?: string;
-  max_price?: number;
+  max_price?: string;
   city?: string;
 };
 
@@ -28,7 +28,15 @@ export async function createListing(
 export async function getListings(
   params?: GetListingsParams,
 ): Promise<Listing[]> {
-  const { data } = await api.get<ListingApiResponse[]>("/listings/", { params });
+  // Drop empty filters so we don't send e.g. max_price="" which the API
+  // can't parse into a number (returns 422).
+  const cleanParams = Object.fromEntries(
+    Object.entries(params ?? {}).filter(([, value]) => value !== ""),
+  );
+
+  const { data } = await api.get<ListingApiResponse[]>("/listings/", {
+    params: cleanParams,
+  });
   return data.map(mapListing);
 }
 
@@ -66,7 +74,7 @@ function mapListing(data: ListingApiResponse): Listing {
 
 export async function getListing(id: string): Promise<Listing> {
   const { data } = await api.get<ListingApiResponse>(`/listings/${id}`);
-  console.log("Fetched listing data:", data); // Debugging line
+
   return mapListing(data);
 }
 
