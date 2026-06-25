@@ -7,7 +7,11 @@ type ListingCardProps = {
   showActions?: boolean;
 };
 
-export function ListingCard({ listing, showActions = false }: ListingCardProps) {
+export function ListingCard({
+  listing,
+  showActions = false,
+}: ListingCardProps) {
+  console.log("ListingCard props:", listing, showActions); // Debugging line
   return (
     <article className="group overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-md transition duration-200 hover:scale-[1.02] hover:shadow-xl">
       <Link href={`/listings/${listing.id}`} className="block">
@@ -21,7 +25,9 @@ export function ListingCard({ listing, showActions = false }: ListingCardProps) 
           />
           <span
             className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold ${
-              listing.sold ? "bg-slate-900/90 text-white" : "bg-brand-600/90 text-white"
+              listing.sold
+                ? "bg-slate-900/90 text-white"
+                : "bg-brand-600/90 text-white"
             }`}
           >
             {listing.sold ? "Sold" : "Available"}
@@ -31,8 +37,12 @@ export function ListingCard({ listing, showActions = false }: ListingCardProps) 
           <h2 className="line-clamp-1 text-base font-bold text-slate-900">
             {listing.title}
           </h2>
-          <p className="text-2xl font-bold leading-none text-brand-600">£{listing.price}</p>
-          <p className="text-sm font-medium text-slate-500">{listing.location}</p>
+          <p className="text-2xl font-bold leading-none text-brand-600">
+            £{listing.price}
+          </p>
+          <p className="text-sm font-medium text-slate-500">
+            {listing.location}
+          </p>
         </div>
       </Link>
 

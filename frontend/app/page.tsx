@@ -1,3 +1,4 @@
+import HomePageListings from "@/components/HomePage/HomePageListings";
 import { ListingCard } from "@/components/listing-card";
 import { mockListings } from "@/lib/mock-listings";
 
@@ -92,20 +93,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-slate-900">
-          Latest Listings
-        </h2>
-        <p className="text-sm font-medium text-slate-500">
-          {mockListings.length} cars available
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {mockListings.map((listing) => (
-          <ListingCard key={listing.id} listing={listing} />
-        ))}
-      </div>
+      <HomePageListings />
     </section>
   );
 }

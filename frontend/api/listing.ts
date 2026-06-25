@@ -28,8 +28,8 @@ export async function createListing(
 export async function getListings(
   params?: GetListingsParams,
 ): Promise<Listing[]> {
-  const { data } = await api.get<Listing[]>("/listings/", { params });
-  return data;
+  const { data } = await api.get<ListingApiResponse[]>("/listings/", { params });
+  return data.map(mapListing);
 }
 
 type ListingApiResponse = {
