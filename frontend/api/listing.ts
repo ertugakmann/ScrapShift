@@ -42,6 +42,10 @@ type ListingApiResponse = {
   location_city: string;
   image_url: string;
   status: string;
+  user: {
+    username: string;
+    phone_number: string;
+  };
 };
 
 function mapListing(data: ListingApiResponse): Listing {
@@ -54,14 +58,15 @@ function mapListing(data: ListingApiResponse): Listing {
     description: data.description,
     mileage: data.mileage,
     year: data.year,
-    sellerName: "Private seller",
-    sellerPhone: "",
+    sellerName: data.user?.username || "",
+    sellerPhone: data.user?.phone_number || "",
     sold: data.status === "sold",
   };
 }
 
 export async function getListing(id: string): Promise<Listing> {
   const { data } = await api.get<ListingApiResponse>(`/listings/${id}`);
+  console.log("Fetched listing data:", data); // Debugging line
   return mapListing(data);
 }
 

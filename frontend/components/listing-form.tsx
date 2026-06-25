@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useState, useRef, useCallback, type ChangeEvent } from "react";
+import {
+  useMemo,
+  useState,
+  useRef,
+  useCallback,
+  type ChangeEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { createListing } from "@/api/listing";
@@ -40,7 +46,7 @@ async function uploadToCloudinary(file: File): Promise<string> {
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    { method: "POST", body: formData }
+    { method: "POST", body: formData },
   );
 
   if (!response.ok) throw new Error("Image upload failed. Please try again.");
@@ -49,7 +55,9 @@ async function uploadToCloudinary(file: File): Promise<string> {
   return data.secure_url as string;
 }
 
-export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps) {
+export function ListingForm({
+  submitLabel = "Create Listing",
+}: ListingFormProps) {
   const router = useRouter();
   const { isAuthenticated: isLoggedIn, isLoading: authLoading } = useAuth();
 
@@ -65,7 +73,9 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
     location_city: "",
   });
 
-  const [uploadState, setUploadState] = useState<UploadState>({ status: "idle" });
+  const [uploadState, setUploadState] = useState<UploadState>({
+    status: "idle",
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -74,7 +84,8 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
 
   const titlePreview = formState.title.trim() || "Your listing title";
   const locationPreview = formState.location_city.trim() || "Add a location";
-  const descriptionPreview = formState.description.trim() || "Your listing description appears here.";
+  const descriptionPreview =
+    formState.description.trim() || "Your listing description appears here.";
   const pricePreview = useMemo(() => {
     if (!formState.price.trim()) return "£0";
     return `£${Number(formState.price).toLocaleString("en-GB")}`;
@@ -88,7 +99,10 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      setUploadState({ status: "error", message: "Please select an image file." });
+      setUploadState({
+        status: "error",
+        message: "Please select an image file.",
+      });
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
@@ -103,7 +117,7 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
       setUploadState((prev) =>
         prev.status === "uploading" && prev.progress < 85
           ? { status: "uploading", progress: prev.progress + 10 }
-          : prev
+          : prev,
       );
     }, 200);
 
@@ -141,7 +155,8 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
   };
 
   const removeImage = () => {
-    if (uploadState.status === "done") URL.revokeObjectURL(uploadState.previewUrl);
+    if (uploadState.status === "done")
+      URL.revokeObjectURL(uploadState.previewUrl);
     setUploadState({ status: "idle" });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -149,9 +164,17 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
   const handleSubmit = async () => {
     setSubmitError(null);
 
-    const { title, description, price, mileage, year, location_city } = formState;
+    const { title, description, price, mileage, year, location_city } =
+      formState;
 
-    if (!title || !description || !price || !mileage || !year || !location_city) {
+    if (
+      !title ||
+      !description ||
+      !price ||
+      !mileage ||
+      !year ||
+      !location_city
+    ) {
       setSubmitError("Please fill in all fields.");
       return;
     }
@@ -188,7 +211,8 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
     }
   };
 
-  const previewImageUrl = uploadState.status === "done" ? uploadState.previewUrl : null;
+  const previewImageUrl =
+    uploadState.status === "done" ? uploadState.previewUrl : null;
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
@@ -200,7 +224,12 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
           </p>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="title" className="block text-sm font-semibold text-slate-700">Title</label>
+              <label
+                htmlFor="title"
+                className="block text-sm font-semibold text-slate-700"
+              >
+                Title
+              </label>
               <input
                 id="title"
                 type="text"
@@ -211,7 +240,12 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="description" className="block text-sm font-semibold text-slate-700">Description</label>
+              <label
+                htmlFor="description"
+                className="block text-sm font-semibold text-slate-700"
+              >
+                Description
+              </label>
               <textarea
                 id="description"
                 rows={5}
@@ -231,7 +265,12 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label htmlFor="price" className="block text-sm font-semibold text-slate-700">Price (£)</label>
+              <label
+                htmlFor="price"
+                className="block text-sm font-semibold text-slate-700"
+              >
+                Price (£)
+              </label>
               <input
                 id="price"
                 type="number"
@@ -242,7 +281,12 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="mileage" className="block text-sm font-semibold text-slate-700">Mileage</label>
+              <label
+                htmlFor="mileage"
+                className="block text-sm font-semibold text-slate-700"
+              >
+                Mileage
+              </label>
               <input
                 id="mileage"
                 type="number"
@@ -255,7 +299,12 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label htmlFor="year" className="block text-sm font-semibold text-slate-700">Year</label>
+              <label
+                htmlFor="year"
+                className="block text-sm font-semibold text-slate-700"
+              >
+                Year
+              </label>
               <input
                 id="year"
                 type="number"
@@ -266,7 +315,12 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="location_city" className="block text-sm font-semibold text-slate-700">Location</label>
+              <label
+                htmlFor="location_city"
+                className="block text-sm font-semibold text-slate-700"
+              >
+                Location
+              </label>
               <input
                 id="location_city"
                 type="text"
@@ -281,7 +335,9 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
 
         {/* Media Upload */}
         <div className="space-y-4 rounded-xl bg-white p-6 shadow-md">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Media</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Media
+          </p>
 
           <input
             ref={fileInputRef}
@@ -304,16 +360,32 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
               }`}
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
-                <svg className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                <svg
+                  className="h-6 w-6 text-slate-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                  />
                 </svg>
               </div>
               <div className="text-center">
-                <p className="text-sm font-semibold text-slate-700">Click to upload or drag & drop</p>
-                <p className="mt-1 text-xs text-slate-400">PNG, JPG, WEBP — max 10MB</p>
+                <p className="text-sm font-semibold text-slate-700">
+                  Click to upload or drag & drop
+                </p>
+                <p className="mt-1 text-xs text-slate-400">
+                  PNG, JPG, WEBP — max 10MB
+                </p>
               </div>
               {uploadState.status === "error" && (
-                <p className="text-xs font-medium text-red-500">{uploadState.message}</p>
+                <p className="text-xs font-medium text-red-500">
+                  {uploadState.message}
+                </p>
               )}
             </div>
           ) : uploadState.status === "uploading" ? (
@@ -331,27 +403,55 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
                   style={{ width: `${uploadState.progress}%` }}
                 />
               </div>
-              <p className="text-xs text-slate-500">Uploading... {uploadState.progress}%</p>
+              <p className="text-xs text-slate-500">
+                Uploading... {uploadState.progress}%
+              </p>
             </div>
           ) : (
             <div className="relative overflow-hidden rounded-xl border border-slate-200">
-              <img src={uploadState.previewUrl} alt="Uploaded preview" className="h-48 w-full object-cover" />
+              <img
+                src={uploadState.previewUrl}
+                alt="Uploaded preview"
+                className="h-48 w-full object-cover"
+              />
               <div className="absolute inset-0 flex items-start justify-end p-2">
                 <button
                   type="button"
                   onClick={removeImage}
                   className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
               <div className="flex items-center gap-2 bg-white px-3 py-2">
-                <svg className="h-4 w-4 flex-shrink-0 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="h-4 w-4 flex-shrink-0 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
-                <p className="text-xs font-medium text-slate-600">Image uploaded successfully</p>
+                <p className="text-xs font-medium text-slate-600">
+                  Image uploaded successfully
+                </p>
               </div>
             </div>
           )}
@@ -363,7 +463,9 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting || authLoading || uploadState.status === "uploading"}
+            disabled={
+              isSubmitting || authLoading || uploadState.status === "uploading"
+            }
             className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {isSubmitting ? "Creating listing..." : submitLabel}
@@ -378,10 +480,18 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
         </p>
         <div className="overflow-hidden rounded-xl bg-white shadow-lg">
           {previewImageUrl ? (
-            <img src={previewImageUrl} alt={titlePreview} className="h-56 w-full object-cover" />
+            <img
+              src={previewImageUrl}
+              alt={titlePreview}
+              className="h-56 w-full object-cover"
+            />
           ) : (
             <div className="relative h-56 w-full bg-gray-200">
-              <img src={sampleImageUrl} alt="Sample listing" className="h-56 w-full object-cover opacity-70" />
+              <img
+                src={sampleImageUrl}
+                alt="Sample listing"
+                className="h-56 w-full object-cover opacity-70"
+              />
               <div className="absolute inset-0 flex items-center justify-center px-4">
                 <span className="rounded-lg bg-white/80 px-3 py-1 text-sm font-medium text-gray-600">
                   Upload an image to preview
@@ -394,7 +504,9 @@ export function ListingForm({ submitLabel = "Create Listing" }: ListingFormProps
               Preview
             </span>
             <div className="space-y-1">
-              <h3 className="text-2xl font-bold text-slate-900">{titlePreview}</h3>
+              <h3 className="text-2xl font-bold text-slate-900">
+                {titlePreview}
+              </h3>
               <p className="text-3xl font-bold text-blue-600">{pricePreview}</p>
               <p className="text-sm text-slate-500">📍 {locationPreview}</p>
             </div>

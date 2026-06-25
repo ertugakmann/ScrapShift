@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { getListing } from "@/api/listing";
 
 type ListingDetailPageProps = {
@@ -90,7 +89,7 @@ export default async function ListingDetailPage({
                 { label: "Seller type", value: "Private seller" },
                 {
                   label: "Listing ID",
-                  value: `#${listing.id.padStart(4, "0")}`,
+                  value: `#${listing.id.toString().padStart(4, "0")}`,
                 },
               ].map((row) => (
                 <div

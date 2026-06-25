@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from passlib.context import CryptContext
 from dotenv import load_dotenv
 

@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
+from app.schemas.user import UserResponse
 
 class ListingCreate(BaseModel):
     title: str
@@ -22,6 +23,7 @@ class ListingResponse(BaseModel):
     image_url: str
     status: str
     created_at: datetime
+    user: UserResponse
 
     class Config:
         from_attributes = True

@@ -21,6 +21,7 @@ def create_listing(listing: ListingCreate, db: Session = Depends(get_db), curren
         location_city=listing.location_city,
         image_url=listing.image_url,
         status=listing.status,
+        user_id=current_user.id
     )
     db.add(new_listing)
     db.commit()
@@ -57,17 +58,19 @@ def get_listing(listing_id: int, db: Session = Depends(get_db)):
 
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found")
+    
     return listing
 
 @router.put("/{listing_id}", response_model=ListingResponse, status_code=200)
 def update_listing(listing_id: int, listing: ListingCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if current_user.id != db.query(Listing).filter(Listing.id == listing_id).first().user_id:
-        raise HTTPException(status_code=403, detail="Unauthorized to update this listing")
-        
     db_listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
     if not db_listing:
         raise HTTPException(status_code=404, detail="Listing not found")
+
+    if current_user.id != db_listing.user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized to update this listing")
+        
 
     db_listing.title = listing.title
     db_listing.description = listing.description
@@ -94,7 +97,7 @@ def delete_listing(listing_id: int, db: Session = Depends(get_db), current_user:
     db.delete(db_listing)
     db.commit()
 
-@router.get("/my-listings", response_model=List[ListingResponse], status_code="200")
+@router.get("/my-listings", response_model=List[ListingResponse], status_code=200)
 def get_my_listings(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     listings = db.query(Listing).filter(Listing.user_id == current_user.id).all()
     return listings

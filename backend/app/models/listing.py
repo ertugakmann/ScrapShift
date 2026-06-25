@@ -1,9 +1,11 @@
 from datetime import datetime
 from app.db import Base
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 
 class Listing(Base):
     __tablename__ = "listings"
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(String, index=True)
@@ -17,3 +19,5 @@ class Listing(Base):
     updated_at = Column(DateTime, default=datetime.now)
 
     user_id = Column(Integer, ForeignKey("users.id"))
+
+    user = relationship("User", back_populates="listings")
