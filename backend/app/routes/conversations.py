@@ -135,7 +135,7 @@ def create_message(conversation_id: int, data: MessageCreate, db: Session = Depe
     new_message = Message(
         conversation_id=conversation.id,
         sender_id=current_user.id,
-        content=data.body
+        body=data.body
     )
 
     db.add(new_message)
