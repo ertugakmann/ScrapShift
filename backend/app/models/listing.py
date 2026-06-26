@@ -14,7 +14,7 @@ class Listing(Base):
     year = Column(Integer, index=True)
     location_city = Column(String, index=True)
     image_url = Column(String, index=True)
-    status = Column(String, index=True)
+    status = Column(String, default="pending")
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now)
 

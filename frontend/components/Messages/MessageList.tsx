@@ -5,39 +5,83 @@ import { OfferCard } from "./OfferCard";
 type MessageListProps = {
   messages: Message[];
   offers: Offer[];
-  currentUserId: number;
+  currentUserId?: number;
 };
 
-type TimelineItem =
+type ContentItem =
   | { kind: "message"; item: Message; key: string }
   | { kind: "offer"; item: Offer; key: string };
 
-function buildTimeline(messages: Message[], offers: Offer[]): TimelineItem[] {
-  const messageItems: TimelineItem[] = messages.map((m) => ({
-    kind: "message",
-    item: m,
-    key: `msg-${m.id}`,
-  }));
-  const offerItems: TimelineItem[] = offers.map((o) => ({
-    kind: "offer",
-    item: o,
-    key: `offer-${o.id}`,
-  }));
+type TimelineItem =
+  | ContentItem
+  | { kind: "separator"; label: string; key: string };
 
-  return [...messageItems, ...offerItems].sort(
+function formatDateLabel(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const isToday =
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+  if (isToday) return "Today";
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday =
+    date.getDate() === yesterday.getDate() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getFullYear() === yesterday.getFullYear();
+  if (isYesterday) return "Yesterday";
+  return date.toLocaleDateString([], {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function buildTimeline(messages: Message[], offers: Offer[]): TimelineItem[] {
+  const contentItems: ContentItem[] = [
+    ...messages.map(
+      (m): ContentItem => ({ kind: "message", item: m, key: `msg-${m.id}` }),
+    ),
+    ...offers.map(
+      (o): ContentItem => ({ kind: "offer", item: o, key: `offer-${o.id}` }),
+    ),
+  ].sort(
     (a, b) =>
       new Date(a.item.created_at).getTime() -
       new Date(b.item.created_at).getTime(),
   );
+
+  const result: TimelineItem[] = [];
+  let lastDateStr = "";
+
+  for (const entry of contentItems) {
+    const dateStr = new Date(entry.item.created_at).toDateString();
+    if (dateStr !== lastDateStr) {
+      result.push({
+        kind: "separator",
+        label: formatDateLabel(entry.item.created_at),
+        key: `sep-${dateStr}`,
+      });
+      lastDateStr = dateStr;
+    }
+    result.push(entry);
+  }
+
+  return result;
 }
 
-export function MessageList({ messages, offers, currentUserId }: MessageListProps) {
+export function MessageList({
+  messages,
+  offers,
+  currentUserId,
+}: MessageListProps) {
   const timeline = buildTimeline(messages, offers);
 
-  if (timeline.length === 0) {
+  if (timeline.filter((t) => t.kind !== "separator").length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center p-8">
-        <p className="text-sm text-slate-400">
+        <p className="text-xs text-slate-400">
           No messages yet. Start the conversation!
         </p>
       </div>
@@ -45,15 +89,30 @@ export function MessageList({ messages, offers, currentUserId }: MessageListProp
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
+    <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-5 py-5">
       {timeline.map((entry) => {
+        if (entry.kind === "separator") {
+          return (
+            <div
+              key={entry.key}
+              className="flex items-center justify-center py-1"
+            >
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-400">
+                {entry.label}
+              </span>
+            </div>
+          );
+        }
+
         if (entry.kind === "message") {
           const msg = entry.item as Message;
           return (
             <MessageBubble
               key={entry.key}
               message={msg}
-              isOwn={msg.sender_id === currentUserId}
+              isOwn={
+                currentUserId !== undefined && msg.sender_id === currentUserId
+              }
             />
           );
         }
@@ -63,7 +122,9 @@ export function MessageList({ messages, offers, currentUserId }: MessageListProp
           <OfferCard
             key={entry.key}
             offer={offer}
-            isOwn={offer.sender_id === currentUserId}
+            isOwn={
+              currentUserId !== undefined && offer.sender_id === currentUserId
+            }
           />
         );
       })}

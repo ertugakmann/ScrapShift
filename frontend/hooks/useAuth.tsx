@@ -5,10 +5,11 @@ import { jwtDecode } from "jwt-decode";
 import { getClientToken, removeToken } from "@/lib/token";
 
 type DecodedToken = {
+  id: number;
+  username: string;
+  email: string;
   exp?: number;
-  email?: string;
-  sub?: string;
-  [key: string]: unknown;
+  sub: string;
 };
 
 type AuthState = {

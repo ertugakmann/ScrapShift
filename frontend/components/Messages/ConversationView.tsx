@@ -10,7 +10,7 @@ type ConversationViewProps = {
   messages: Message[];
   offers: Offer[];
   listing: Listing;
-  currentUserId: number;
+  currentUserId?: number;
 };
 
 export function ConversationView({
@@ -21,7 +21,7 @@ export function ConversationView({
   currentUserId,
 }: ConversationViewProps) {
   const otherUser =
-    Number(conversation.buyer.id) === currentUserId
+    currentUserId && Number(conversation.buyer.id) === currentUserId
       ? conversation.seller
       : conversation.buyer;
 

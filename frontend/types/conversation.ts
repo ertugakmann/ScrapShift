@@ -1,8 +1,10 @@
+import { StringDecoder } from "string_decoder";
 import { User } from "./user";
+import { Listing } from "./listing";
 
 export type Conversation = {
   id: number;
-  listing_id: number;
+  listing: Listing;
   buyer: User;
   seller: User;
   unread_count: number;

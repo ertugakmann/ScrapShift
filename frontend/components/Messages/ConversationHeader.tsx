@@ -13,11 +13,11 @@ export function ConversationHeader({
   isOnline = false,
 }: ConversationHeaderProps) {
   return (
-    <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
+    <div className="flex h-16 flex-none items-center gap-3 border-b border-slate-100 bg-white px-5">
       {/* Avatar with online indicator */}
       <div className="relative flex-shrink-0">
         <div
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700"
+          className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600"
           aria-label={`${otherUser.username}'s avatar`}
         >
           {otherUser.username.charAt(0).toUpperCase()}
@@ -25,18 +25,23 @@ export function ConversationHeader({
         <span
           aria-label={isOnline ? "Online" : "Offline"}
           title={isOnline ? "Online" : "Offline"}
-          className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white ${
+          className={`absolute bottom-0 right-0 h-[11px] w-[11px] rounded-full ring-2 ring-white ${
             isOnline ? "bg-green-400" : "bg-slate-300"
           }`}
         />
       </div>
 
-      {/* User and listing info */}
+      {/* User info + listing title */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-slate-900">
-          {otherUser.username}
-        </p>
-        <p className="truncate text-xs text-slate-500">{listing.title}</p>
+        <div className="flex items-baseline gap-1.5">
+          <p className="truncate text-[15px] font-semibold tracking-tight text-slate-900">
+            {otherUser.username}
+          </p>
+          <span className="flex-shrink-0 text-xs text-slate-400">
+            {isOnline ? "Online" : "Offline"}
+          </span>
+        </div>
+        <p className="truncate text-[12.5px] text-slate-500">{listing.title}</p>
       </div>
     </div>
   );

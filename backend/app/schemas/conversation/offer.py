@@ -8,7 +8,7 @@ class OfferCreate(BaseModel):
     amount: float
 
 class OfferUpdate(BaseModel):
-    status: Literal["accepted", "declined"]
+    status: Literal["accepted", "declined", "pending"]
 
 class OfferResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

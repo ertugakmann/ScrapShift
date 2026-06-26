@@ -3,7 +3,7 @@ export type Listing = {
   title: string;
   price: number;
   location: string;
-  image: string;
+  image_url: string;
   description: string;
   mileage: number;
   year: number;
