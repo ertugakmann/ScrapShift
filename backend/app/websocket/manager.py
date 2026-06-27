@@ -6,18 +6,27 @@ class ConnectionManager:
     def __init__(self):
         self.connections: dict[int, list[WebSocket]] = defaultdict(list)
         self.user_connections: dict[int, int] = {}
+        self.socket_user: dict[int, int] = {}  # id(websocket) → user_id
 
     def _remove_socket(self, conversation_id: int, websocket: WebSocket) -> None:
+        self.socket_user.pop(id(websocket), None)
         if websocket in self.connections[conversation_id]:
             self.connections[conversation_id].remove(websocket)
         if not self.connections[conversation_id]:
             del self.connections[conversation_id]
+
+    def is_user_in_conversation(self, conversation_id: int, user_id: int) -> bool:
+        return any(
+            self.socket_user.get(id(ws)) == user_id
+            for ws in self.connections.get(conversation_id, [])
+        )
 
     async def connect(
         self, conversation_id: int, websocket: WebSocket, user_id: int
     ) -> None:
         await websocket.accept()
         self.connections[conversation_id].append(websocket)
+        self.socket_user[id(websocket)] = user_id
         self.user_connections[user_id] = self.user_connections.get(user_id, 0) + 1
         if self.user_connections[user_id] == 1:
             await self.broadcast(

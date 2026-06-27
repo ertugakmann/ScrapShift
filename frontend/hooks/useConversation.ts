@@ -21,13 +21,28 @@ export function useConversation({
     setMessages(initialMessages);
   }, [initialMessages]);
 
-  const { isOtherUserOnline } = useConversationSocket({
-    conversationId,
-    otherUserId,
-    onMessageCreated: (message: Message) => {
-      setMessages((prev) => [...prev, message]);
-    },
-  });
+  const { isOtherUserOnline, isOtherUserTyping, sendTypingEvent } =
+    useConversationSocket({
+      conversationId,
+      otherUserId,
+      onMessageCreated: (message: Message) => {
+        setMessages((prev) => [...prev, message]);
+      },
+      onMessageDelivered: (messageId: number, deliveredAt: string) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId ? { ...m, delivered_at: deliveredAt } : m,
+          ),
+        );
+      },
+      onMessageRead: (messageId: number, readAt: string) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId ? { ...m, read_at: readAt } : m,
+          ),
+        );
+      },
+    });
 
   const sendMessage = async (body: string): Promise<void> => {
     await createMessage(conversationId, body);
@@ -37,5 +52,7 @@ export function useConversation({
     messages,
     sendMessage,
     isOtherUserOnline,
+    isOtherUserTyping,
+    sendTypingEvent,
   };
 }

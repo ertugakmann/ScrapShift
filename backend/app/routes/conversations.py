@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.schemas.conversation.conversation import ConversationCreate, ConversationResponse
@@ -143,12 +145,33 @@ async def create_message(conversation_id: int, data: MessageCreate, db: Session 
     db.commit()
     db.refresh(new_message)
     await manager.broadcast(
-    conversation_id,
-    {
-        "type": "message_created",
-        "data": MessageResponse.model_validate(new_message).model_dump(mode="json"),
-    },
+        conversation_id,
+        {
+            "type": "message_created",
+            "data": MessageResponse.model_validate(new_message).model_dump(mode="json"),
+        },
     )
+
+    # If the recipient is viewing this conversation right now, mark as delivered+read immediately
+    other_user_id = (
+        conversation.seller_id
+        if current_user.id == conversation.buyer_id
+        else conversation.buyer_id
+    )
+    if manager.is_user_in_conversation(conversation_id, other_user_id):
+        now = datetime.now()
+        new_message.delivered_at = now
+        new_message.read_at = now
+        db.commit()
+        await manager.broadcast(
+            conversation_id,
+            {"type": "message_delivered", "message_id": new_message.id, "delivered_at": now.isoformat()},
+        )
+        await manager.broadcast(
+            conversation_id,
+            {"type": "message_read", "message_id": new_message.id, "read_at": now.isoformat()},
+        )
+
     return new_message
 
 @router.get("/{conversation_id}/messages", response_model=List[MessageResponse], status_code=200)

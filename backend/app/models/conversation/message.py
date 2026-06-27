@@ -10,8 +10,10 @@ class Message(Base):
     conversation_id = Column(Integer, ForeignKey("conversations.id"))
     sender_id = Column(Integer, ForeignKey("users.id"))
     body = Column(String)
-    is_read = is_read = Column(Boolean, default=False)
+    is_read = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now)
+    delivered_at = Column(DateTime, nullable=True)
+    read_at = Column(DateTime, nullable=True)
 
     conversation = relationship("Conversation", back_populates="messages")
     sender = relationship("User")

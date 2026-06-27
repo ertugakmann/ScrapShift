@@ -30,12 +30,17 @@ export function ConversationView({
       ? conversation.seller
       : conversation.buyer;
 
-  const { messages: conversationMessages, sendMessage, isOtherUserOnline } =
-    useConversation({
-      conversationId: conversation.id,
-      otherUserId: Number(otherUser.id),
-      initialMessages: messages,
-    });
+  const {
+    messages: conversationMessages,
+    sendMessage,
+    isOtherUserOnline,
+    isOtherUserTyping,
+    sendTypingEvent,
+  } = useConversation({
+    conversationId: conversation.id,
+    otherUserId: Number(otherUser.id),
+    initialMessages: messages,
+  });
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -47,13 +52,28 @@ export function ConversationView({
 
       <ListingPreviewCard listing={listing} />
 
+      <div className="h-5 flex-none px-5 pt-1">
+        {isOtherUserTyping && (
+          <span className="text-[11.5px] text-slate-400">
+            {otherUser.username} is typing…
+          </span>
+        )}
+      </div>
+
       <MessageList
         messages={conversationMessages}
         offers={offers}
         currentUserId={currentUserId}
       />
 
-      <MessageInput onSend={sendMessage} />
+      <MessageInput
+        onSend={(body) => {
+          sendTypingEvent("typing_stop");
+          sendMessage(body);
+        }}
+        onTypingStart={() => sendTypingEvent("typing_start")}
+        onTypingStop={() => sendTypingEvent("typing_stop")}
+      />
     </div>
   );
 }

@@ -12,6 +12,24 @@ function formatTime(iso: string) {
   });
 }
 
+function ReadReceipt({ message }: { message: Message }) {
+  if (message.read_at) {
+    return (
+      <span className="text-[10px] font-medium text-brand-500">✓✓ Read</span>
+    );
+  }
+  if (message.delivered_at) {
+    return (
+      <span className="text-[10px] font-medium text-slate-400">
+        ✓✓ Delivered
+      </span>
+    );
+  }
+  return (
+    <span className="text-[10px] font-medium text-slate-400">✓ Sent</span>
+  );
+}
+
 export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
   return (
     <div className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
@@ -27,12 +45,15 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
         >
           <p className="whitespace-pre-wrap break-words">{message.body}</p>
         </div>
-        <time
-          dateTime={message.created_at}
-          className="px-1 text-[10.5px] font-medium text-slate-400"
-        >
-          {formatTime(message.created_at)}
-        </time>
+        <div className="flex items-center gap-1.5 px-1">
+          <time
+            dateTime={message.created_at}
+            className="text-[10.5px] font-medium text-slate-400"
+          >
+            {formatTime(message.created_at)}
+          </time>
+          {isOwn && <ReadReceipt message={message} />}
+        </div>
       </div>
     </div>
   );

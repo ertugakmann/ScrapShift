@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from app.schemas.common import UserBrief
 
@@ -7,10 +8,12 @@ class MessageCreate(BaseModel):
 
 class MessageResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-        
+
     id: int
     conversation_id: int
-    sender_id: int 
+    sender_id: int
     body: str
     is_read: bool
     created_at: datetime
+    delivered_at: Optional[datetime] = None
+    read_at: Optional[datetime] = None

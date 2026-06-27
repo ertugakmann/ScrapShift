@@ -1,18 +1,71 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 type MessageInputProps = {
   onSend: (body: string) => void;
+  onTypingStart: () => void;
+  onTypingStop: () => void;
   disabled?: boolean;
 };
 
-export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
+const TYPING_STOP_DELAY = 2000;
+
+export function MessageInput({
+  onSend,
+  onTypingStart,
+  onTypingStop,
+  disabled = false,
+}: MessageInputProps) {
   const [draft, setDraft] = useState("");
+  const isTyping = useRef(false);
+  const stopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function clearStopTimer() {
+    if (stopTimer.current !== null) {
+      clearTimeout(stopTimer.current);
+      stopTimer.current = null;
+    }
+  }
+
+  function stopTyping(reason: string) {
+    if (isTyping.current) {
+      isTyping.current = false;
+      onTypingStop();
+    }
+    clearStopTimer();
+  }
+
+  useEffect(() => {
+    return () => {
+      stopTyping("cleanup");
+    };
+    // stopTyping is stable — refs don't change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleChange = (value: string) => {
+    setDraft(value);
+
+    if (value.length > 0) {
+      if (!isTyping.current) {
+        isTyping.current = true;
+        onTypingStart();
+      }
+      clearStopTimer();
+      stopTimer.current = setTimeout(() => {
+        isTyping.current = false;
+        onTypingStop();
+      }, TYPING_STOP_DELAY);
+    } else {
+      stopTyping("empty");
+    }
+  };
 
   const handleSend = () => {
     const trimmed = draft.trim();
     if (!trimmed) return;
+    stopTyping("sendMessage");
     onSend(trimmed);
     setDraft("");
   };
@@ -31,7 +84,7 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
       <div className="flex items-end gap-2.5">
         <textarea
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled}
           rows={1}

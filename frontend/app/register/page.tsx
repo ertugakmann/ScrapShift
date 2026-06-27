@@ -26,7 +26,6 @@ export default function RegisterPage() {
       await register(email, password, username, phone_number);
       router.push("/login");
     } catch (err: any) {
-      console.log(err.response?.data?.detail);
       if (err.response?.data?.detail === "Username is already taken") {
         setError("Username is already taken");
       } else if (
