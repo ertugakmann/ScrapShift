@@ -12,6 +12,7 @@ from typing import List
 from app.dependencies.db import get_db
 from app.dependencies.auth import get_current_user
 from app.schemas.conversation.conversation import ConversationContentResponse
+from app.websocket.manager import manager
 
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
@@ -123,7 +124,7 @@ def get_conversation(conversation_id: int, db: Session = Depends(get_db), curren
     return conversation
 
 @router.post("/{conversation_id}/messages", response_model=MessageResponse, status_code=201)
-def create_message(conversation_id: int, data: MessageCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def create_message(conversation_id: int, data: MessageCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
 
     if not conversation:
@@ -141,6 +142,13 @@ def create_message(conversation_id: int, data: MessageCreate, db: Session = Depe
     db.add(new_message)
     db.commit()
     db.refresh(new_message)
+    await manager.broadcast(
+    conversation_id,
+    {
+        "type": "message_created",
+        "data": MessageResponse.model_validate(new_message).model_dump(mode="json"),
+    },
+    )
     return new_message
 
 @router.get("/{conversation_id}/messages", response_model=List[MessageResponse], status_code=200)

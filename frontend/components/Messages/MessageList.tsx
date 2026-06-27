@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Message, Offer } from "@/types/conversation";
 import { MessageBubble } from "./MessageBubble";
 import { OfferCard } from "./OfferCard";
@@ -71,14 +74,53 @@ function buildTimeline(messages: Message[], offers: Offer[]): TimelineItem[] {
   return result;
 }
 
+const SCROLL_THRESHOLD = 100;
+
 export function MessageList({
   messages,
   offers,
   currentUserId,
 }: MessageListProps) {
-  const timeline = buildTimeline(messages, offers);
+  const timeline = useMemo(
+    () => buildTimeline(messages, offers),
+    [messages, offers],
+  );
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isNearBottom = useRef(true);
+  const prevCount = useRef(messages.length + offers.length);
+  const [showBanner, setShowBanner] = useState(false);
 
-  if (timeline.filter((t) => t.kind !== "separator").length === 0) {
+  function scrollToBottom(behavior: ScrollBehavior = "smooth") {
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior });
+  }
+
+  useEffect(() => {
+    scrollToBottom("auto");
+  }, []);
+
+  useEffect(() => {
+    const total = messages.length + offers.length;
+    if (total === prevCount.current) return;
+    prevCount.current = total;
+
+    if (isNearBottom.current) {
+      scrollToBottom("smooth");
+      setShowBanner(false);
+    } else {
+      setShowBanner(true);
+    }
+  }, [messages, offers]);
+
+  function handleScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    isNearBottom.current = distanceFromBottom <= SCROLL_THRESHOLD;
+    if (isNearBottom.current) setShowBanner(false);
+  }
+
+  if (messages.length === 0 && offers.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center p-8">
         <p className="text-xs text-slate-400">
@@ -89,45 +131,63 @@ export function MessageList({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-5 py-5">
-      {timeline.map((entry) => {
-        if (entry.kind === "separator") {
-          return (
-            <div
-              key={entry.key}
-              className="flex items-center justify-center py-1"
-            >
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-400">
-                {entry.label}
-              </span>
-            </div>
-          );
-        }
+    <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex flex-1 flex-col gap-2 overflow-y-auto px-5 py-5"
+      >
+        {timeline.map((entry) => {
+          if (entry.kind === "separator") {
+            return (
+              <div
+                key={entry.key}
+                className="flex items-center justify-center py-1"
+              >
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-400">
+                  {entry.label}
+                </span>
+              </div>
+            );
+          }
 
-        if (entry.kind === "message") {
-          const msg = entry.item as Message;
+          if (entry.kind === "message") {
+            const msg = entry.item as Message;
+            return (
+              <MessageBubble
+                key={entry.key}
+                message={msg}
+                isOwn={
+                  currentUserId !== undefined && msg.sender_id === currentUserId
+                }
+              />
+            );
+          }
+
+          const offer = entry.item as Offer;
           return (
-            <MessageBubble
+            <OfferCard
               key={entry.key}
-              message={msg}
+              offer={offer}
               isOwn={
-                currentUserId !== undefined && msg.sender_id === currentUserId
+                currentUserId !== undefined && offer.sender_id === currentUserId
               }
             />
           );
-        }
+        })}
+      </div>
 
-        const offer = entry.item as Offer;
-        return (
-          <OfferCard
-            key={entry.key}
-            offer={offer}
-            isOwn={
-              currentUserId !== undefined && offer.sender_id === currentUserId
-            }
-          />
-        );
-      })}
+      {showBanner && (
+        <button
+          onClick={() => {
+            scrollToBottom("smooth");
+            setShowBanner(false);
+          }}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-slate-700 px-4 py-1.5 text-xs font-medium text-white shadow-lg transition-colors hover:bg-slate-600"
+        >
+          New messages ↓
+        </button>
+      )}
     </div>
   );
 }

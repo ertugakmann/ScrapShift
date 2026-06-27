@@ -1,60 +1,35 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
-import { getClientToken, removeToken } from "@/lib/token";
+import api from "@/lib/axios";
 
-type DecodedToken = {
+type AuthUser = {
   id: number;
   username: string;
   email: string;
-  exp?: number;
-  sub: string;
+  phone_number: string;
+  created_at: string;
 };
 
 type AuthState = {
   isAuthenticated: boolean;
-  user: DecodedToken | null;
+  user: AuthUser | null;
   isLoading: boolean;
-  refreshAuth: () => void;
-};
-
-const isExpired = (exp?: number) => {
-  if (!exp) {
-    return false;
-  }
-
-  return Date.now() >= exp * 1000;
+  refreshAuth: () => Promise<void>;
 };
 
 export const useAuth = (): AuthState => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<DecodedToken | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshAuth = useCallback(() => {
-    const token = getClientToken();
-
-    if (!token) {
-      setIsAuthenticated(false);
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
-
+  const refreshAuth = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const decoded = jwtDecode<DecodedToken>(token);
-
-      if (isExpired(decoded.exp)) {
-        removeToken();
-        setIsAuthenticated(false);
-        setUser(null);
-      } else {
-        setIsAuthenticated(true);
-        setUser(decoded);
-      }
+      const response = await api.get<AuthUser>("/auth/me");
+      setIsAuthenticated(true);
+      setUser(response.data);
     } catch {
-      removeToken();
       setIsAuthenticated(false);
       setUser(null);
     } finally {
