@@ -82,7 +82,10 @@ export function useConversationSocket({
           if (payload.user_id === otherUserId) setIsOtherUserTyping(false);
           break;
         case "message_delivered":
-          onMessageDeliveredRef.current(payload.message_id, payload.delivered_at);
+          onMessageDeliveredRef.current(
+            payload.message_id,
+            payload.delivered_at,
+          );
           break;
         case "message_read":
           onMessageReadRef.current(payload.message_id, payload.read_at);

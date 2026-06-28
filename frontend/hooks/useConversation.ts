@@ -37,9 +37,7 @@ export function useConversation({
       },
       onMessageRead: (messageId: number, readAt: string) => {
         setMessages((prev) =>
-          prev.map((m) =>
-            m.id === messageId ? { ...m, read_at: readAt } : m,
-          ),
+          prev.map((m) => (m.id === messageId ? { ...m, read_at: readAt } : m)),
         );
       },
     });
