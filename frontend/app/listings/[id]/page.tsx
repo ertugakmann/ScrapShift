@@ -198,6 +198,12 @@ export default async function ListingDetailPage({
                   {listing.sellerPhone}
                 </span>
               </div>
+              <Link
+                href={`/users/${listing.sellerId}/listings`}
+                className="mt-3 inline-block text-sm text-brand-600 hover:underline"
+              >
+                View all listings
+              </Link>
             </div>
 
             {/* Make an offer */}

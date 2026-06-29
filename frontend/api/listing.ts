@@ -59,6 +59,7 @@ type ListingApiResponse = {
   image_url: string;
   status: string;
   user: {
+    id: number;
     username: string;
     phone_number: string;
   };
@@ -74,10 +75,18 @@ function mapListing(data: ListingApiResponse): Listing {
     description: data.description,
     mileage: data.mileage,
     year: data.year,
+    sellerId: data.user?.id || 0,
     sellerName: data.user?.username || "",
     sellerPhone: data.user?.phone_number || "",
     status: data.status as "active" | "sold",
   };
+}
+
+export async function getSellerListings(userId: string): Promise<Listing[]> {
+  const { data } = await api.get<ListingApiResponse[]>(
+    `/listings/user/${userId}`,
+  );
+  return data.map(mapListing);
 }
 
 export async function getListing(id: string): Promise<Listing> {

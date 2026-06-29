@@ -16,10 +16,13 @@ export function Navbar() {
         { href: "/", label: "Home" },
         { href: "/sell", label: "Sell" },
         { href: "/my-listings", label: "My Listings" },
+        { href: "/messages", label: "Messages" },
       ]
     : [
         { href: "/", label: "Home" },
         { href: "/sell", label: "Sell" },
+        { href: "/my-listings", label: "My Listings" },
+        { href: "/messages", label: "Messages" },
       ];
 
   const handleLogout = () => {

@@ -57,6 +57,17 @@ def get_my_listings(db: Session = Depends(get_db), current_user: User = Depends(
     return listings
 
 
+@router.get("/user/{user_id}", response_model=List[ListingResponse], status_code=200)
+def get_user_listings(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    listings = db.query(Listing).filter(
+        Listing.user_id == user_id,
+        Listing.status == "active"
+    ).order_by(Listing.created_at.desc()).all()
+    return listings
+
 @router.get("/{listing_id}", response_model=ListingResponse, status_code=200)
 def get_listing(listing_id: int, db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()

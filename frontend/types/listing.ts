@@ -7,6 +7,7 @@ export type Listing = {
   description: string;
   mileage: number;
   year: number;
+  sellerId: number;
   sellerName: string;
   sellerPhone: string;
   status: "active" | "sold";
