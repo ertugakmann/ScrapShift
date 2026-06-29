@@ -9,5 +9,5 @@ export type Listing = {
   year: number;
   sellerName: string;
   sellerPhone: string;
-  sold?: boolean;
+  status: "active" | "sold";
 };

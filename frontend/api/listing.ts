@@ -1,3 +1,4 @@
+import axios from "@/lib/axios";
 import api from "@/lib/axios";
 import { Listing } from "@/types/listing";
 
@@ -40,6 +41,13 @@ export async function getListings(
   return data.map(mapListing);
 }
 
+export async function getMyListings(): Promise<Listing[]> {
+  const { data } = await axios.get<ListingApiResponse[]>(
+    "/listings/my-listings",
+  );
+  return data.map(mapListing);
+}
+
 type ListingApiResponse = {
   id: number;
   title: string;
@@ -62,13 +70,13 @@ function mapListing(data: ListingApiResponse): Listing {
     title: data.title,
     price: data.price,
     location: data.location_city,
-    image: data.image_url,
+    image_url: data.image_url,
     description: data.description,
     mileage: data.mileage,
     year: data.year,
     sellerName: data.user?.username || "",
     sellerPhone: data.user?.phone_number || "",
-    sold: data.status === "sold",
+    status: data.status as "active" | "sold",
   };
 }
 
@@ -92,4 +100,8 @@ export async function deleteListing(id: number): Promise<void> {
 
 export async function markListingAsSold(id: number): Promise<void> {
   await api.patch(`/listings/${id}/sold`);
+}
+
+export async function markListingAsActive(id: number): Promise<void> {
+  await api.patch(`/listings/${id}/active`);
 }

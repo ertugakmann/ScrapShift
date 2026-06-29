@@ -50,14 +50,14 @@ export default async function ListingDetailPage({
           {/* Image — clean, no overlays */}
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-100">
             <Image
-              src={listing.image}
+              src={listing.image_url}
               alt={listing.title}
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 60vw"
               priority
             />
-            {listing.sold && (
+            {listing.status === "sold" && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                 <span className="rounded-full bg-slate-900/90 px-4 py-1.5 text-sm font-bold uppercase tracking-widest text-white">
                   Sold
@@ -139,7 +139,7 @@ export default async function ListingDetailPage({
                 {listing.location}
               </p>
 
-              {!listing.sold && (
+              {listing.status === "active" && (
                 <div className="mt-4 space-y-2">
                   <a
                     href={`tel:${listing.sellerPhone}`}
@@ -201,7 +201,7 @@ export default async function ListingDetailPage({
             </div>
 
             {/* Make an offer */}
-            {!listing.sold && (
+            {listing.status === "active" && (
               <div className="rounded-2xl border border-slate-200/80 bg-white p-5">
                 <h3 className="text-sm font-bold text-slate-900">
                   Make an offer

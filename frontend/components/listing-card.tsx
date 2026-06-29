@@ -5,18 +5,24 @@ import Link from "next/link";
 type ListingCardProps = {
   listing: Listing;
   showActions?: boolean;
+  handleMarkAsSold?: (listingId: number) => void;
+  handleMarkAsActive?: (listingId: number) => void;
+  handleEdit?: (listingId: number) => void;
 };
 
 export function ListingCard({
   listing,
   showActions = false,
+  handleEdit,
+  handleMarkAsSold,
+  handleMarkAsActive,
 }: ListingCardProps) {
   return (
     <article className="group overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-md transition duration-200 hover:scale-[1.02] hover:shadow-xl">
       <Link href={`/listings/${listing.id}`} className="block">
         <div className="relative h-48 w-full overflow-hidden">
           <Image
-            src={listing.image}
+            src={listing.image_url}
             alt={listing.title}
             fill
             className="object-cover transition duration-300 group-hover:scale-105"
@@ -24,12 +30,12 @@ export function ListingCard({
           />
           <span
             className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold ${
-              listing.sold
+              listing.status === "sold"
                 ? "bg-slate-900/90 text-white"
                 : "bg-brand-600/90 text-white"
             }`}
           >
-            {listing.sold ? "Sold" : "Available"}
+            {listing.status === "active" ? "Active" : "Sold"}
           </span>
         </div>
         <div className="space-y-2.5 p-4">
@@ -47,23 +53,27 @@ export function ListingCard({
 
       {showActions ? (
         <div className="flex flex-wrap gap-2 border-t border-slate-100 bg-slate-50/50 px-4 pb-4 pt-3">
+          {/* TODO: Delete is intentionally disabled for now — listings can have active conversations,
+              and for the MVP we only support editing and marking a listing as sold. */}
           <button
             type="button"
+            onClick={() => handleEdit?.(listing.id)}
             className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
           >
             Edit
           </button>
           <button
             type="button"
-            className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
-          >
-            Delete
-          </button>
-          <button
-            type="button"
             className="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            onClick={() => {
+              if (listing.status === "active") {
+                handleMarkAsSold?.(listing.id);
+              } else {
+                handleMarkAsActive?.(listing.id);
+              }
+            }}
           >
-            Mark as Sold
+            {listing.status === "active" ? "Mark as Sold" : "Mark as Active"}
           </button>
         </div>
       ) : null}

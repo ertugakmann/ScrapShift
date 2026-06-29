@@ -1,4 +1,4 @@
-import axios from "@/lib/axios";
+import api from "@/lib/axios";
 import { Conversation, Message, Offer } from "@/types/conversation";
 
 export type CreateConversationPayload = {
@@ -14,19 +14,19 @@ export type ConversationContent = {
 export async function createConversation(
   payload: CreateConversationPayload,
 ): Promise<Conversation> {
-  const { data } = await axios.post("/conversations", payload);
+  const { data } = await api.post("/conversations", payload);
   return data;
 }
 
 export async function getConversations(): Promise<Conversation[]> {
-  const { data } = await axios.get<Conversation[]>("/conversations");
+  const { data } = await api.get<Conversation[]>("/conversations");
   return data;
 }
 
 export async function getConversation(
   conversationId: number,
 ): Promise<Conversation> {
-  const { data } = await axios.get<Conversation>(
+  const { data } = await api.get<Conversation>(
     `/conversations/${conversationId}`,
   );
   return data;
@@ -35,7 +35,7 @@ export async function getConversation(
 export async function getConversationContent(
   conversationId: number,
 ): Promise<ConversationContent> {
-  const { data } = await axios.get<ConversationContent>(
+  const { data } = await api.get<ConversationContent>(
     `/conversations/${conversationId}`,
   );
 
@@ -46,7 +46,7 @@ export async function createMessage(
   conversationId: number,
   body: string,
 ): Promise<Message> {
-  const { data } = await axios.post<Message>(
+  const { data } = await api.post<Message>(
     `/conversations/${conversationId}/messages`,
     { body },
   );
@@ -54,7 +54,7 @@ export async function createMessage(
 }
 
 export async function getMessages(conversationId: number): Promise<Message[]> {
-  const { data } = await axios.get<Message[]>(
+  const { data } = await api.get<Message[]>(
     `/conversations/${conversationId}/messages`,
   );
   return data;
@@ -64,7 +64,7 @@ export async function createOffer(
   conversationId: number,
   amount: number,
 ): Promise<Offer> {
-  const { data } = await axios.post<Offer>(
+  const { data } = await api.post<Offer>(
     `/conversations/${conversationId}/offers`,
     {
       amount,
@@ -74,7 +74,7 @@ export async function createOffer(
 }
 
 export async function getOffers(conversationId: number): Promise<Offer[]> {
-  const { data } = await axios.get<Offer[]>(
+  const { data } = await api.get<Offer[]>(
     `/conversations/${conversationId}/offers`,
   );
   return data;
@@ -85,7 +85,7 @@ export async function answerOffer(
   offerId: number,
   status: "accepted" | "declined",
 ): Promise<Offer> {
-  const { data } = await axios.patch<Offer>(
+  const { data } = await api.patch<Offer>(
     `/conversations/${conversationId}/offers/${offerId}`,
     { status },
   );
@@ -93,7 +93,7 @@ export async function answerOffer(
 }
 
 export async function getUnreadCount(): Promise<number> {
-  const { data } = await axios.get<{ unread_count: number }>(
+  const { data } = await api.get<{ unread_count: number }>(
     "/conversations/unread-count",
   );
   return data.unread_count;

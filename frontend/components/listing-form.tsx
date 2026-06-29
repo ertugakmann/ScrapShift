@@ -9,10 +9,12 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { createListing } from "@/api/listing";
+import { createListing, updateListing } from "@/api/listing";
+import { Listing } from "@/types/listing";
 
 type ListingFormProps = {
   submitLabel?: string;
+  initialData?: Listing;
 };
 
 type ListingFormState = {
@@ -56,8 +58,10 @@ async function uploadToCloudinary(file: File): Promise<string> {
 }
 
 export function ListingForm({
-  submitLabel = "Create Listing",
+  submitLabel,
+  initialData,
 }: ListingFormProps) {
+  const isEditMode = !!initialData;
   const router = useRouter();
   const { isAuthenticated: isLoggedIn, isLoading: authLoading } = useAuth();
 
@@ -65,17 +69,19 @@ export function ListingForm({
     "https://scontent-lhr6-2.xx.fbcdn.net/v/t39.30808-6/654131993_10241852049694971_1869751033498488982_n.jpg?stp=c0.169.1536.1536a_dst-jpg_s565x565_tt6&_nc_cat=104&ccb=1-7&_nc_sid=4f26a2&_nc_ohc=BtXF0_v93uIQ7kNvwFpIO7i&_nc_oc=Ado3uem4_HHsUCjd1AmZHXdUsU9YiAtaMTKTEYk2vQAOOuWw5XDn1mij-Wgj72hw-eQ&_nc_zt=23&_nc_ht=scontent-lhr6-2.xx&_nc_gid=HMagC25t9xiKFH84RVye3A&_nc_ss=7a30f&oh=00_Afz79uAKktrhDRyEty6Yrdm02qwblotwSxi7Ma7o4JSRRA&oe=69C3116B";
 
   const [formState, setFormState] = useState<ListingFormState>({
-    title: "",
-    description: "",
-    price: "",
-    mileage: "",
-    year: "",
-    location_city: "",
+    title: initialData?.title ?? "",
+    description: initialData?.description ?? "",
+    price: initialData?.price != null ? String(initialData.price) : "",
+    mileage: initialData?.mileage != null ? String(initialData.mileage) : "",
+    year: initialData?.year != null ? String(initialData.year) : "",
+    location_city: initialData?.location ?? "",
   });
 
-  const [uploadState, setUploadState] = useState<UploadState>({
-    status: "idle",
-  });
+  const [uploadState, setUploadState] = useState<UploadState>(
+    initialData?.image_url
+      ? { status: "done", url: initialData.image_url, previewUrl: initialData.image_url }
+      : { status: "idle" },
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -202,7 +208,7 @@ export function ListingForm({
     setIsSubmitting(true);
 
     try {
-      const listing = await createListing({
+      const payload = {
         title,
         description,
         price: Number(price),
@@ -210,10 +216,16 @@ export function ListingForm({
         year: Number(year),
         location_city,
         image_url: uploadState.url,
-        status: "active",
-      });
+        status: initialData?.status ?? "active",
+      } as const;
 
-      router.push(`/listings/${listing.id}`);
+      if (isEditMode) {
+        await updateListing(initialData!.id, payload);
+        router.push("/my-listings");
+      } else {
+        const listing = await createListing({ ...payload, status: "active" });
+        router.push(`/listings/${listing.id}`);
+      }
     } catch (err: any) {
       setSubmitError(err?.response?.data?.detail ?? "Something went wrong.");
     } finally {
@@ -478,7 +490,9 @@ export function ListingForm({
             }
             className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
-            {isSubmitting ? "Creating listing..." : submitLabel}
+            {isSubmitting
+              ? isEditMode ? "Saving changes..." : "Creating listing..."
+              : submitLabel ?? (isEditMode ? "Save Changes" : "Create Listing")}
           </button>
         </div>
       </div>
